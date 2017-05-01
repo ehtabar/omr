@@ -2,8 +2,8 @@ function doPost(e) {
  
   if (!e) return;
  
-  var sheetID = "GOOGLE_SPREADSHEET_ID";  // Replace this with the Google Spreadsheet ID
-  var sheetName = "Sheet1";       // Replace this with the sheet name inside the Spreadsheet
+  var sheetID = "1har2eGGnnapa_eFql-Eo0E0GH42hguqjftYb8UqaURk";  // Replace this with the Google Spreadsheet ID
+  var sheetName = "Omr";       // Replace this with the sheet name inside the Spreadsheet
  
   var status = {};
  
@@ -69,3 +69,177 @@ function doPost(e) {
 function normalize_(str) {
   return str.replace(/[^\w]/g, "").toLowerCase();
 }
+
+
+
+
+
+
+
+function myOnEdit(e){
+  if (!e) return;
+  var range = e.range;
+
+  
+    if (range.getColumn() !=39 )
+    {
+      //range.setValue(range.getColumn());
+      return ; 
+    }
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheets()[0];
+  messageRange = sheet.getRange(range.getRow(), 49);
+  messageText = messageRange.getValue();
+  mobileNumberRange = sheet.getRange(range.getRow(), 44);
+  mobileNumber = mobileNumberRange.getValue();
+try 
+{
+  var date = new Date();
+  date.setDate(date.getDate() + 7);
+  var sendSmsDateRange = sheet.getRange(range.getRow(), 60);
+  sendSmsDateRange.setValue(date);
+} catch (err)
+{
+         Logger.log(err);
+
+}
+ 
+  //ScriptApp.newTrigger("sendMessage")
+  // .timeBased()
+   //.at(triggerDay)
+   //.create();
+  
+  
+   //  try {
+     //  var responseMessage = sendSms(mobileNumber ,messageText);
+      //  status = "sent";
+      //} catch(err) {
+      //  Logger.log(err);
+      //  status = "error";
+    // }
+ 
+
+  range.setNote('Last modified: ' + new Date());
+  var text = range.getColumn();
+  text = text  + range.getRow();
+ // range.setValue( status);
+  
+}
+
+function createEveryDaySmsWathcer ()
+{
+     ScriptApp.newTrigger("checkSms")
+   .timeBased()
+   .everyMinutes(1)
+   .create();
+}
+function checkSms()
+{
+  Logger.clear();
+   var ss = SpreadsheetApp.getActiveSpreadsheet();
+   var sheet = ss.getSheets()[0];
+  var rowCount = sheet.getMaxRows();
+  
+  for (var i = 1 ; i < rowCount + 1 ; i ++ )
+  {
+
+      var sendSmsDateRange = sheet.getRange(i , 60);
+    
+    var sendSmsDate = sendSmsDateRange.getValue();
+    Logger.log(sendSmsDate);
+    Logger.log(i);
+    if (sendSmsDate == null || sendSmsDate == "" || sendSmsDate== "sent")
+    {
+      continue ;
+    }
+    var sendSmsDateValue = sendSmsDate;
+
+   
+   var nowDate = new Date ();
+     Logger.log(sendSmsDate.toDateString());
+    Logger.log(nowDate.toDateString());
+    Logger.log("up dates should be same ! ");
+    
+    if ( sendSmsDate.toDateString()  == nowDate.toDateString() )
+    {
+      Logger.log('if is true! ');
+      messageRange = sheet.getRange(i, 52);
+      messageText = messageRange.getValue();
+      mobileNumberRange = sheet.getRange(i, 50);
+      mobileNumber = mobileNumberRange.getValue();
+      Logger.log(messageText , mobileNumber)
+          try {
+       var responseMessage = sendSms(mobileNumber ,messageText);
+        status = "sent";
+      } catch(err) {
+        Logger.log(err);
+        status = "error";
+     }
+      
+      sendSmsDateRange.setValue('sent');
+    }
+    
+  }
+  
+  
+
+  
+}
+
+function onAyFieldChange (e)
+{
+  if (!e )
+  {
+    return ;
+  }
+   var ss = SpreadsheetApp.getActiveSpreadsheet();
+   var sheet = ss.getSheets()[0];
+  
+    var range = e.range;
+  rangeValue = range.getValue();
+  Logger.clear();
+
+ 
+  if (range.getColumn() != 46 )
+  {
+    return ; 
+  }
+    Logger.log('called')
+
+  if (rangeValue == 1 || rangeValue =="1" || rangeValue == 1.0 )
+  {
+    Logger.log('sould change ! ');
+    var textRange = sheet.getRange(range.getRow() , 53 );
+    var textValue = textRange.getValue();
+    var numberRange = sheet.getRange(range.getRow(), 50 );
+    var numberValue = numberRange.getValue();
+     try {
+       var responseMessage = sendSms(numberValue ,textValue);
+       Logger.log('sms sent');
+       Logger.log(responseMessage);
+      } catch(err) {
+       Logger.log(err);
+        status = "error";
+    }
+ 
+  }else {
+    return ;
+  }
+  
+}
+var apikey="714F4F6772664B615853756B784365375557746D53673D3D";
+var sender="10009022432274";
+function sendSms(receptor, message) {
+  var messages_url = "https://api.kavenegar.com/v1/"+apikey+"/sms/send.json";
+  var payload = {
+    "receptor": receptor,
+    "message" : message,
+    "sender" : sender
+  };
+  var options = {
+    "method" : "post",
+    "payload" : payload
+  };
+  UrlFetchApp.fetch(messages_url, options);
+}s
